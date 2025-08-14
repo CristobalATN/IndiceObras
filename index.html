@@ -17,6 +17,27 @@
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+        /* --- Contenedor superior fijo --- */
+        .fixed-header {
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            background-color: #fff; 
+            padding: 10px 0;
+            border-bottom: 1px solid #ccc;
+        }
+        /* --- Encabezados de la tabla fijos --- */
+        #linkList {
+            border-collapse: separate; /* Necesario para que funcione sticky */
+            border-spacing: 0;
+        }
+        #linkList thead th {
+            position: sticky;
+            top: var(--thead-offset, 0px); /* se setea con JS */
+            background-color: #005a9e;
+            color: #fff;
+            z-index: 2;
+        }
         h1 {
             color: #005a9e;
             font-size: 24px;
@@ -40,7 +61,6 @@
         }
         .table {
             width: 100%;
-            border-collapse: collapse;
             margin-top: 20px;
         }
         .table th, .table td {
@@ -49,12 +69,7 @@
             text-align: left;
         }
         .table td {
-            font-size: 12px; /* Cambia este valor al tamaNo que desees */
-        }
-        .table th {
-            background-color: #005a9e;
-            color: white;
-            font-weight: bold;
+            font-size: 12px;
         }
         .table tbody tr:nth-child(even) {
             background-color: #f9f9f9;
@@ -71,16 +86,17 @@
 </head>
 <body>
     <div class="container-fluid">
-        <h1 class="mt-3">Documentacion: Lista de Obras</h1> 
-        <input type="text" id="searchInput1" class="form-control mb-3" placeholder="Buscar por primer criterio...">
-        <input type="text" id="searchInput2" class="form-control mb-3" placeholder="Buscar por segundo criterio...">
-        <p id="matchCountDisplay">Coincidencias encontradas: 0</p>
-        <button id="clearButton" class="btn btn-orange mb-3">Limpiar</button>
-        <button id="sortButton" class="btn btn-orange mb-3">Ordenar a-z</button>
-        <button onclick="exportarTextoPlano('linkList', 'Lista_de_Obras')" class="btn btn-orange mb-3">Exportar todo a texto</button>
-        <button id="exportAllCsvButton" class="btn btn-orange mb-3">Exportar todo a CSV</button>
-        <button id="exportFilteredCsvButton" class="btn btn-orange mb-3">Exportar filtrado a CSV</button>
-
+        <div class="fixed-header">
+            <h1 class="mt-3">Documentacion: Lista de Obras</h1> 
+            <input type="text" id="searchInput1" class="form-control mb-3" placeholder="Buscar por primer criterio...">
+            <input type="text" id="searchInput2" class="form-control mb-3" placeholder="Buscar por segundo criterio...">
+            <p id="matchCountDisplay">Coincidencias encontradas: 0</p>
+            <button id="clearButton" class="btn btn-orange mb-3">Limpiar</button>
+            <button id="sortButton" class="btn btn-orange mb-3">Ordenar a-z</button>
+            <button onclick="exportarTextoPlano('linkList', 'Lista_de_Obras')" class="btn btn-orange mb-3">Exportar todo a texto</button>
+            <button id="exportAllCsvButton" class="btn btn-orange mb-3">Exportar todo a CSV</button>
+            <button id="exportFilteredCsvButton" class="btn btn-orange mb-3">Exportar filtrado a CSV</button>
+        </div>
         <table id="linkList" class="table">
             <thead>
                 <tr>
@@ -93,7 +109,6 @@
                 </tr>
             </thead>
             <tbody>
-
 <!-- Comienza espacio para agregar obras -->
 
 <tr>	<td>	<b>	100 DIAS PARA ENAMORARSE	</b>	</td>	<td>	100_DIAS_PARA_ENAMORARSE	</td>	<td>	2019 SERIE	</td>	<td>	SEBASTIAN ORTEGA, RODRIGO BASTIDAS, MILENA BASTIDAS, ELENA MUNOZ, ENRIQUE BRAVO, TICOY RODRIGUEZ, MARIA EUGENIA RENCORET	</td>	<td>	<b>	CARPETA	</b>	<td>	<a href="	https://atnchile.sharepoint.com/sites/Documentacin/Obras/Forms/AllItems.aspx?RootFolder=/sites%2FDocumentacin%2FObras%2FFICHAS%5FAV%5FFIRMADAS%2F100%5FDIAS%5FPARA%5FENAMORARSE&amp;View=%7B9C35FF40%2D83E5%2D4155%2D9785%2D4525F8A96976%7D	"  target="_blank">	ENLACE A	CARPETA	</a>	</td>	</tr>
@@ -6868,23 +6883,34 @@
 <!-- FIN LISTADO OBRAS -->
 <!-- Finaliza espacio para agregar obras -->
 
-          </tbody>
-      </table>
-</div>
-    <!-- Scripts de Bootstrap (jQuery primero, luego Popper.js, luego Bootstrap JS) -->
+
+        </tbody>
+     </table>
+    </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"></script>
 
     <script>
+        // Calcular offset dinámico para sticky th
+        (function () {
+            function setStickyOffset() {
+                const fh = document.querySelector('.fixed-header');
+                const h = fh ? fh.offsetHeight : 0;
+                document.documentElement.style.setProperty('--thead-offset', h + 'px');
+            }
+            window.addEventListener('load', setStickyOffset);
+            window.addEventListener('resize', setStickyOffset);
+        })();
+
         function filterTable() {
             var input1 = document.getElementById('searchInput1').value.toUpperCase();
             var input2 = document.getElementById('searchInput2').value.toUpperCase();
             var table = document.getElementById('linkList');
             var tr = table.getElementsByTagName('tr');
-            var matchCount = 0; // Inicializa el contador de coincidencias
+            var matchCount = 0; 
 
-            for (var i = 1; i < tr.length; i++) { // Empieza en 1 para omitir el encabezado
+            for (var i = 1; i < tr.length; i++) { 
                 var match1 = false;
                 var match2 = false;
                 var td = tr[i].getElementsByTagName('td');
@@ -6897,30 +6923,28 @@
                         match2 = true;
                     }
                 }
-                // La fila se muestra solo si cumple ambos criterios
                 if (match1 && match2) {
                     tr[i].style.display = "";
-                    matchCount++; // Incrementa el contador si hay una coincidencia
+                    matchCount++; 
                 } else {
                     tr[i].style.display = "none";
                 }
             }
-            // Actualiza el contador en la pAgina
             document.getElementById("matchCountDisplay").textContent = "Coincidencias encontradas: " + matchCount;
         }
 
         function clearInputs() {
             document.getElementById('searchInput1').value = '';
             document.getElementById('searchInput2').value = '';
-            filterTable(); // Llama a la funciOn de filtrado para actualizar la tabla
+            filterTable();
         }
 
         let sortDirection = 1;
 
         function sortTable() {
             let table = document.getElementById('linkList');
-            let rows = Array.from(table.rows).slice(1); // Excluye la fila de encabezado
-            let columna = 0; // Indice de la columna "TItulo"
+            let rows = Array.from(table.rows).slice(1);
+            let columna = 0; 
 
             rows.sort(function (a, b) {
                 let valor1 = a.cells[columna].innerText.toUpperCase();
@@ -6935,7 +6959,7 @@
                 return 0;
             });
 
-            sortDirection *= -1; // Cambia la direcciOn cada vez que ordenas
+            sortDirection *= -1; 
 
             rows.forEach(row => table.appendChild(row));
         }
@@ -6945,70 +6969,51 @@
         document.getElementById("clearButton").addEventListener("click", clearInputs);
         document.getElementById("sortButton").addEventListener("click", sortTable);
 
-        // FunciOn para exportar la tabla a un archivo de texto plano
         function exportarTextoPlano(idTabla, nombreArchivo = '') {
             let tablaDatos = document.getElementById(idTabla);
             let filas = tablaDatos.getElementsByTagName('tr');
             let contenido = '';
 
-            // Iterar sobre las filas de la tabla
             for (let i = 0; i < filas.length; i++) {
                 let celdas = filas[i].getElementsByTagName('td');
                 let filaContenido = [];
 
-                // Si es la fila de encabezado, la saltamos o la procesamos si es necesario para el texto plano
                 if (i === 0 && filas[i].parentNode.tagName === 'THEAD') {
-                    // Si el encabezado tiene <th>, lo puedes incluir si deseas.
-                    // Para este ejemplo, solo nos enfocamos en el <tbody> para el texto plano
                     continue; 
                 }
 
                 for (let j = 0; j < celdas.length; j++) {
-                    if (j === celdas.length - 1) { // Si es la Ultima celda (Link SharePoint)
+                    if (j === celdas.length - 1) { 
                         let linkElement = celdas[j].querySelector('a');
-                        filaContenido.push(linkElement ? linkElement.href : ''); // Obtener la URL o cadena vacIa
+                        filaContenido.push(linkElement ? linkElement.href : ''); 
                     } else {
                         filaContenido.push(celdas[j].innerText.trim());
                     }
                 }
-                if (filaContenido.length > 0) { // Solo si hay contenido en la fila
+                if (filaContenido.length > 0) {
                     contenido += filaContenido.join('\\') + '\n';
                 }
             }
 
-            // Nombre del archivo
             nombreArchivo = nombreArchivo ? nombreArchivo + '.txt' : 'Reporte_Obras.txt';
-
-            // Crear un Blob para el contenido
             let blob = new Blob([contenido], { type: 'text/plain' });
-
-            // Crear el link de descarga
             let linkDescarga = document.createElement("a");
             linkDescarga.href = URL.createObjectURL(blob);
             linkDescarga.download = nombreArchivo;
-
-            // Ejecutar la funciOn
             document.body.appendChild(linkDescarga);
             linkDescarga.click();
             document.body.removeChild(linkDescarga);
         }
 
-        /**
-         * FunciOn para exportar la tabla a un archivo CSV.
-         * @param {boolean} exportAll Si es true, exporta toda la tabla; si es false, solo las filas visibles.
-         */
         function exportTableToCsv(exportAll) {
             const table = document.getElementById('linkList');
             let csv = [];
             const rows = table.querySelectorAll('tr');
 
-            // Get headers
             const headerCells = rows[0].querySelectorAll('th');
             const headers = Array.from(headerCells).map(th => {
                 let text = th.innerText.trim();
-                // Replace double quotes with two double quotes to escape them in CSV
                 text = text.replace(/"/g, '""');
-                // Enclose in double quotes if text contains comma or new line
                 if (text.includes(',') || text.includes('\n')) {
                     return `"${text}"`;
                 }
@@ -7016,10 +7021,8 @@
             });
             csv.push(headers.join(','));
 
-            // Get data rows
-            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip header row
+            for (let i = 1; i < rows.length; i++) { 
                 const row = rows[i];
-                // If exportAll is false, skip hidden rows
                 if (!exportAll && row.style.display === 'none') {
                     continue;
                 }
@@ -7028,16 +7031,14 @@
                 const cells = row.querySelectorAll('td');
                 for (let j = 0; j < cells.length; j++) {
                     let cellText;
-                    if (j === cells.length - 1) { // Last column is Link Sharepoint
+                    if (j === cells.length - 1) { 
                         const link = cells[j].querySelector('a');
                         cellText = link ? link.href : '';
                     } else {
                         cellText = cells[j].innerText.trim();
                     }
                     
-                    // Replace double quotes with two double quotes to escape them in CSV
                     cellText = cellText.replace(/"/g, '""');
-                    // Enclose in double quotes if text contains comma or new line
                     if (cellText.includes(',') || cellText.includes('\n')) {
                         rowData.push(`"${cellText}"`);
                     } else {
@@ -7058,15 +7059,13 @@
             document.body.removeChild(link);
         }
 
-        // Event listeners para los nuevos botones
         document.getElementById('exportAllCsvButton').addEventListener('click', function() {
-            exportTableToCsv(true); // Exporta toda la tabla
+            exportTableToCsv(true); 
         });
 
         document.getElementById('exportFilteredCsvButton').addEventListener('click', function() {
-            exportTableToCsv(false); // Exporta solo lo filtrado
+            exportTableToCsv(false); 
         });
-
     </script>
 </body>
 </html>
